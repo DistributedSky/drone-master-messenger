@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <node name="messenger" pkg="drone_master_messenger" type="messenger.py" output="screen" />
+    <node name="drone_messenger" pkg="drone_master_messenger" type="master.py" output="screen" />
 </launch>

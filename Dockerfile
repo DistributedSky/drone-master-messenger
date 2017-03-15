@@ -1,7 +1,7 @@
 FROM ros:kinetic-ros-base
 
 RUN apt-get update 
-RUN apt-get install -y sudo python3-sqlalchemy python3-psycopg2
+RUN apt-get install -y sudo python-yaml python-sqlalchemy python-psycopg2
 
 ADD ./drone_master_messenger /tmp/build/src/drone_master_messenger 
 RUN . /opt/ros/kinetic/setup.sh \

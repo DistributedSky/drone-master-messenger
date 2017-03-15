@@ -1,12 +1,8 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*- 
 from sqlalchemy import create_engine, Column, Integer, String, Sequence, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-from quad_commander import *
-import rosservice
 import rospy
-import os
 
 ## Declarative database synonym
 Base = declarative_base()
@@ -14,42 +10,43 @@ Base = declarative_base()
 class DroneMove(Base):
     __tablename__ = 'drone_move'
     id    = Column(Integer, Sequence('drone_move_id_seq'), primary_key=True)
+    drone = Column(String)
     point = Column(String)
+
+class DroneFree(Base):
+    __tablename__ = 'drone_free'
+    id    = Column(Integer, Sequence('drone_free_id_seq'), primary_key=True)
+    drone = Column(String, unique=True)
+
+    def __init__(self, adapter):
+        drone = adapter
 
 def spawn_db():
     db = create_engine(os.environ['DB_CONN_STRING'], client_encoding='utf8')
     return sessionmaker(bind=db)()
 
-if __name__ == '__main__':
+def messenger_free_drone(adapter):
+    try:
+        db = spawn_db()
+        db.add(DroneFree(adapter))
+        db.commit()
+    except e:
+        pass
+
+def messenger_mission_gen(adapter):
     db = spawn_db()
-    rospy.init_node('drone_hire')
-    rospy.wait_for_service('mavros/mission/set_current')
-    mission = rospy.ServiceProxy('mavros/mission/set_current', WaypointSetCurrent)
-    rospy.loginfo('mission service found')
-
-    while len(db.query(DroneMove).all()) == 0:
-        rospy.sleep(1)
-
-    rospy.loginfo("command received, activating...")
-    arming()
-    rospy.sleep(5)
-    set_mode('AUTO')
-    rospy.loginfo("AUTO mode activated")
 
     while not rospy.is_shutdown():
-        if len(db.query(DroneMove).all()) > 0:
-            act = db.query(DroneMove).first()
-            rospy.loginfo('received command: ' + act.point)
-            db.query(DroneMove).delete()
-            db.commit()
+        if len(db.query(DroneMove).filter_by(drone=adapter).all()) > 0:
+            act = db.query(DroneMove).filter_by(drone=adapter).first()
             if act.point == 'A':
-                mission(2)
+                yield 2
             elif act.point == 'B':
-                mission(3)
+                yield 3
             elif act.point == 'C':
-                mission(4)
+                yield 4
             elif act.point == 'Home':
-                set_mode('RTL')
-                rospy.loginfo('drone fly home, mission done')
-                break
+                yield (-1)
+            db.query(DroneMove).filter_by(drone=adapter).delete()
+            db.commit()
         rospy.sleep(1)

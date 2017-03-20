@@ -2,7 +2,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Sequence, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-import rospy
+import rospy, os
 
 ## Declarative database synonym
 Base = declarative_base()
@@ -19,19 +19,17 @@ class DroneFree(Base):
     drone = Column(String, unique=True)
 
     def __init__(self, adapter):
-        drone = adapter
+        self.drone = adapter
 
 def spawn_db():
     db = create_engine(os.environ['DB_CONN_STRING'], client_encoding='utf8')
     return sessionmaker(bind=db)()
 
-def messenger_free_drone(adapter):
-    try:
-        db = spawn_db()
+def messenger_drone_free(adapter):
+    db = spawn_db()
+    if not db.query(DroneFree).filter_by(drone=adapter).first():
         db.add(DroneFree(adapter))
         db.commit()
-    except e:
-        pass
 
 def messenger_mission_gen(adapter):
     db = spawn_db()

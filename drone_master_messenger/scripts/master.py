@@ -4,8 +4,10 @@ from mavros_msgs.srv import CommandBool, SetMode
 from mavros_msgs.msg import State
 from std_msgs.msg import String, UInt32
 from messenger import messenger_mission_gen
+from messenger import messenger_drone_free
 import rospy, thread
 
+adapters = []
 states = {}
 
 def set_mode(adapter, mode):
@@ -37,13 +39,15 @@ if __name__ == '__main__':
 
     def drone_adapter(msg):
         adapter = msg.data
+
+        # Check for double reg
+        if adapter in adapters:
+            return
+        else:
+            adapters.append(adapter)
+            messenger_drone_free(adapter)
+
         rospy.loginfo('Found adapter {0}'.format(adapter))
-
-        def drone_state(msg):
-            states[adapter] = msg
-
-            if not msg.armed:
-                messenger_free_drone(adapter)
 
         rospy.Subscriber(msg.data+'/mavros/state', State, drone_state)
         rospy.loginfo('{0} :: State subscribed'.format(adapter))
@@ -63,7 +67,7 @@ if __name__ == '__main__':
                 mission(point)
                 rospy.loginfo('{0} :: Current mission point -> {1}'.format(adapter, point))
 
-        thread.start_new_thread(drone_mission, [])
+        thread.start_new_thread(drone_mission, ())
 
     rospy.Subscriber('/adapter', String, drone_adapter)
     rospy.spin()

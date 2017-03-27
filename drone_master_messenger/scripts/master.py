@@ -51,7 +51,10 @@ if __name__ == '__main__':
 
         rospy.loginfo('Found adapter {0}'.format(adapter))
 
-        rospy.Subscriber(msg.data+'/mavros/state', State, lambda s: states[adapter] = s)
+        def drone_state(msg):
+            states[adapter] = msg
+
+        rospy.Subscriber(msg.data+'/mavros/state', State, drone_state)
         rospy.loginfo('{0} :: State subscribed'.format(adapter))
 
         def drone_mission():

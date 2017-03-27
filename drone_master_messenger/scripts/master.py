@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 from mavros_msgs.srv import CommandBool, SetMode
+from mavros_msgs.srv import WaypointSetCurrent
 from mavros_msgs.msg import State
 from std_msgs.msg import String, UInt32
 from messenger import messenger_mission_gen

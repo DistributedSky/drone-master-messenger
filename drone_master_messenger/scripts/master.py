@@ -49,8 +49,8 @@ if __name__ == '__main__':
 
         rospy.loginfo('Found adapter {0}'.format(adapter))
 
-        rospy.Subscriber(msg.data+'/mavros/state', State, drone_state)
-        rospy.loginfo('{0} :: State subscribed'.format(adapter))
+        #rospy.Subscriber(msg.data+'/mavros/state', State, drone_state)
+        #rospy.loginfo('{0} :: State subscribed'.format(adapter))
 
         def drone_mission():
             rospy.loginfo('{0} :: Mission thread started'.format(adapter))

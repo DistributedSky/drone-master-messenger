@@ -29,7 +29,7 @@ def arming(adapter):
         arm = rospy.ServiceProxy(adapter+'/mavros/cmd/arming', CommandBool)
         arm(True)
         rospy.loginfo(adapter+" :: Armed")
-        rospy.sleep(5)
+        rospy.sleep(3)
         set_mode(adapter, 'AUTO')
         rospy.loginfo(adapter+" :: AUTO mode activated")
     except e:
@@ -67,11 +67,12 @@ if __name__ == '__main__':
                 if not states[adapter].armed:
                     arming(adapter)
 
-                rospy.wait_for_service(adapter+'/mavros/mission/set_current')
-                mission = rospy.ServiceProxy(adapter+'/mavros/mission/set_current',
-                                             WaypointSetCurrent)
-                mission(point)
-                rospy.loginfo('{0} :: Current mission point -> {1}'.format(adapter, point))
+                if point >= 0:
+                    rospy.wait_for_service(adapter+'/mavros/mission/set_current')
+                    mission = rospy.ServiceProxy(adapter+'/mavros/mission/set_current',
+                                                 WaypointSetCurrent)
+                    mission(point)
+                    rospy.loginfo('{0} :: Current mission point -> {1}'.format(adapter, point))
 
         thread.start_new_thread(drone_mission, ())
 

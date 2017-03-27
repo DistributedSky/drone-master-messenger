@@ -34,6 +34,8 @@ def arming(adapter):
     except e:
         print('Service call failed: {0}'.format(e))
 
+states = {}
+
 if __name__ == '__main__':
     rospy.init_node('drone_master')
 
@@ -49,8 +51,8 @@ if __name__ == '__main__':
 
         rospy.loginfo('Found adapter {0}'.format(adapter))
 
-        #rospy.Subscriber(msg.data+'/mavros/state', State, drone_state)
-        #rospy.loginfo('{0} :: State subscribed'.format(adapter))
+        rospy.Subscriber(msg.data+'/mavros/state', State, lambda s: states[adapter] = s)
+        rospy.loginfo('{0} :: State subscribed'.format(adapter))
 
         def drone_mission():
             rospy.loginfo('{0} :: Mission thread started'.format(adapter))

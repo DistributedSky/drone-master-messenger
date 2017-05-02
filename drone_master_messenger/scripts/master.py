@@ -63,6 +63,7 @@ if __name__ == '__main__':
             for point in messenger_mission_gen(adapter):
                 if point < 0:
                     rtl(adapter)
+                    messenger_drone_free(adapter)
 
                 if not states[adapter].armed:
                     arming(adapter)

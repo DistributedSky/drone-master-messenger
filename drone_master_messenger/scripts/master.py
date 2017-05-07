@@ -13,13 +13,10 @@ states = {}
 
 def set_mode(adapter, mode):
     rospy.wait_for_service(adapter+'/mavros/set_mode')
-    service = rospy.ServiceProxy(adapter+'/mavros/set_mode', SetMode)
-    service(0, mode)
-
-def rtl(adapter):
     try:
-        set_mode(adapter, 'RTL')
-        rospy.loginfo(adapter+" :: RTL mode activated")
+        service = rospy.ServiceProxy(adapter+'/mavros/set_mode', SetMode)
+        service(0, mode)
+        rospy.loginfo('{0} :: {1} mode activated'.format(adapter, mode))
     except e:
         print('Service call failed: {0}'.format(e))
 
@@ -28,10 +25,8 @@ def arming(adapter):
     try:
         arm = rospy.ServiceProxy(adapter+'/mavros/cmd/arming', CommandBool)
         arm(True)
-        rospy.loginfo(adapter+" :: Armed")
+        rospy.loginfo('{0} :: Armed'.format(adapter))
         rospy.sleep(3)
-        set_mode(adapter, 'AUTO')
-        rospy.loginfo(adapter+" :: AUTO mode activated")
     except e:
         print('Service call failed: {0}'.format(e))
 
@@ -62,11 +57,14 @@ if __name__ == '__main__':
             rospy.loginfo('{0} :: Mission thread started'.format(adapter))
             for point in messenger_mission_gen(adapter):
                 if point < 0:
-                    rtl(adapter)
+                    set_mode(adapter, 'RTL')
                     messenger_drone_free(adapter)
 
                 if not states[adapter].armed:
                     arming(adapter)
+
+                if states[adapters].mode != 'AUTO':
+                    set_mode(adapter, 'AUTO')
 
                 if point >= 0:
                     rospy.wait_for_service(adapter+'/mavros/mission/set_current')

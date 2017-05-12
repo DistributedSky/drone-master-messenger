@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
-from mavros_msgs.srv import CommandBool, SetMode
+from mavros_msgs.srv import CommandBool, CommandTOL, SetMode
 from mavros_msgs.srv import WaypointSetCurrent
 from mavros_msgs.msg import State
 from std_msgs.msg import String, UInt32
@@ -27,6 +27,16 @@ def arming(adapter):
         arm(True)
         rospy.loginfo('{0} :: Armed'.format(adapter))
         rospy.sleep(3)
+    except e:
+        print('Service call failed: {0}'.format(e))
+
+def takeoff(adapter):
+    rospy.wait_for_service(adapter+'/mavros/cmd/takeoff')
+    try:
+        takeoff = rospy.ServiceProxy(adapter+'/mavros/cmd/takeoff', CommandTOL)
+        takeoff(0,0,0,0,10)
+        rospy.loginfo('{0} :: Takeoff'.format(adapter))
+        rospy.sleep(10)
     except e:
         print('Service call failed: {0}'.format(e))
 
@@ -62,6 +72,7 @@ if __name__ == '__main__':
 
                 if not states[adapter].armed:
                     arming(adapter)
+                    takeoff(adapter)
 
                 if states[adapters].mode != 'AUTO':
                     set_mode(adapter, 'AUTO')

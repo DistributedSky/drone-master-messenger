@@ -35,16 +35,19 @@ def messenger_mission_gen(adapter):
     db = spawn_db()
 
     while not rospy.is_shutdown():
-        if len(db.query(DroneMove).filter_by(drone=adapter).all()) > 0:
-            act = db.query(DroneMove).filter_by(drone=adapter).first()
-            if act.point == 'A':
-                yield 2
-            elif act.point == 'B':
-                yield 3
-            elif act.point == 'C':
-                yield 4
-            elif act.point == 'Home':
-                yield (-1)
-            db.query(DroneMove).filter_by(drone=adapter).delete()
-            db.commit()
+        try:
+            if len(db.query(DroneMove).filter_by(drone=adapter).all()) > 0:
+                act = db.query(DroneMove).filter_by(drone=adapter).first()
+                if act.point == 'A':
+                    yield 2
+                elif act.point == 'B':
+                    yield 3
+                elif act.point == 'C':
+                    yield 4
+                elif act.point == 'Home':
+                    yield (-1)
+                db.query(DroneMove).filter_by(drone=adapter).delete()
+                db.commit()
+        except e:
+            rospy.logerr('Unable to get movement from FBMessenger')
         rospy.sleep(1)

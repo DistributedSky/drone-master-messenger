@@ -48,6 +48,6 @@ def messenger_mission_gen(adapter):
                     yield (-1)
                 db.query(DroneMove).filter_by(drone=adapter).delete()
                 db.commit()
-        except e:
+        except:
             rospy.logerr('Unable to get movement from FBMessenger')
         rospy.sleep(1)

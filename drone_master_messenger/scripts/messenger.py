@@ -32,10 +32,10 @@ def messenger_drone_free(adapter):
         db.commit()
 
 def messenger_mission_gen(adapter):
-    db = spawn_db()
-
     while not rospy.is_shutdown():
         try:
+            db = spawn_db()
+
             if len(db.query(DroneMove).filter_by(drone=adapter).all()) > 0:
                 act = db.query(DroneMove).filter_by(drone=adapter).first()
                 if act.point == 'A':
@@ -50,4 +50,5 @@ def messenger_mission_gen(adapter):
                 db.commit()
         except:
             rospy.logerr('Unable to get movement from FBMessenger')
+
         rospy.sleep(1)

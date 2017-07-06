@@ -73,16 +73,14 @@ if __name__ == '__main__':
         rospy.Subscriber('{0}/mavros/state'.format(adapter), State, drone_state)
         rospy.loginfo('{0} :: State subscribed'.format(adapter))
 
-        def drone_video(msg):
-            messenger_drone_video(adapter, msg.data)
+        def drone_ipfs_link(msg):
+            link = 'https://ipfs.io/ipfs/{0}'.format(msg.data)
+            messenger_drone_link(adapter, link)
 
-        rospy.Subscriber('{0}/camera/video'.format(adapter), String, drone_video)
+        rospy.Subscriber('{0}/camera/video'.format(adapter), String, drone_ipfs_link)
         rospy.loginfo('{0} :: Video subscribed'.format(adapter))
 
-        def drone_thumbnail(msg):
-            messenger_drone_thumbnail(adapter, msg.data)
-
-        rospy.Subscriber('{0}/camera/thumbnail'.format(adapter), String, drone_thumbnail)
+        rospy.Subscriber('{0}/camera/thumbnail'.format(adapter), String, drone_ipfs_link)
         rospy.loginfo('{0} :: Thumbnail subscribed'.format(adapter))
 
         def drone_mission():
